@@ -201,7 +201,24 @@ export class BookingsService {
     return { ...updated, refundFcfa };
   }
 
+  // Avance automatiquement les statuts selon les dates (en prod : job planifié).
+  // paid → ongoing dès le début de la location ; ongoing → completed après la fin.
+  // Pour les voitures, la remise/retour via l'état des lieux reste prioritaire :
+  // on ne force le passage qu'aux dates dépassées.
+  private async refreshStatuses(where: object) {
+    const now = new Date();
+    await this.prisma.booking.updateMany({
+      where: { ...where, status: 'paid', startDate: { lte: now } },
+      data: { status: 'ongoing' },
+    });
+    await this.prisma.booking.updateMany({
+      where: { ...where, status: 'ongoing', endDate: { lte: now } },
+      data: { status: 'completed' },
+    });
+  }
+
   async myBookings(userId: string) {
+    await this.refreshStatuses({ renterId: userId });
     return this.prisma.booking.findMany({
       where: { renterId: userId },
       include: { listing: { include: { photos: true } }, payments: true },
@@ -210,6 +227,7 @@ export class BookingsService {
   }
 
   async ownerBookings(ownerId: string) {
+    await this.refreshStatuses({ listing: { ownerId } });
     return this.prisma.booking.findMany({
       where: { listing: { ownerId } },
       include: {

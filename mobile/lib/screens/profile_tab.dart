@@ -141,10 +141,13 @@ class _ProfileTabState extends State<ProfileTab> {
       if (rectoUrl == null) return;
       final versoUrl = await _pickAndUpload('Maintenant, photo du VERSO de $label');
       if (versoUrl == null) return;
+      final selfieUrl = await _pickAndUpload('Pour finir, un selfie bien éclairé 🤳');
+      if (selfieUrl == null) return;
       await Api.post('/users/me/kyc', body: {
         'documents': [
           {'type': '${docType}_recto', 'fileUrl': rectoUrl},
           {'type': '${docType}_verso', 'fileUrl': versoUrl},
+          {'type': 'selfie', 'fileUrl': selfieUrl},
         ],
       });
       if (!mounted) return;

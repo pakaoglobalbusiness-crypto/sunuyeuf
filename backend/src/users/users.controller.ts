@@ -19,13 +19,14 @@ class UpdateProfileDto {
 }
 
 class KycDocDto {
-  // Identité : recto + verso de la CNI ou du permis de conduire.
+  // Identité : recto + verso de la CNI ou du permis de conduire + selfie.
   // carte_grise/assurance restent pour les annonces de voitures (F15).
   @IsIn([
     'cni_recto',
     'cni_verso',
     'permis_recto',
     'permis_verso',
+    'selfie',
     'passeport',
     'carte_grise',
     'assurance',

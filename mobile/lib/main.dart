@@ -6,23 +6,23 @@ import 'api.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 
-const senegalGreen = Color(0xFF00853F);
-const senegalYellow = Color(0xFFFDEF42);
+const gologuiTeal = Color(0xFF0B4F47);
+const gologuiOrange = Color(0xFFF49D37);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('fr');
   await Api.init();
-  runApp(const SunuyeufApp());
+  runApp(const GologuiApp());
 }
 
-class SunuyeufApp extends StatelessWidget {
-  const SunuyeufApp({super.key});
+class GologuiApp extends StatelessWidget {
+  const GologuiApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sunuyeuf',
+      title: 'Gologui',
       debugShowCheckedModeBanner: false,
       locale: const Locale('fr'),
       supportedLocales: const [Locale('fr'), Locale('en')],
@@ -32,14 +32,14 @@ class SunuyeufApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: senegalGreen),
+        colorScheme: ColorScheme.fromSeed(seedColor: gologuiTeal),
         appBarTheme: const AppBarTheme(
-          backgroundColor: senegalGreen,
+          backgroundColor: gologuiTeal,
           foregroundColor: Colors.white,
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
-            backgroundColor: senegalGreen,
+            backgroundColor: gologuiTeal,
             minimumSize: const Size.fromHeight(52),
             textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),

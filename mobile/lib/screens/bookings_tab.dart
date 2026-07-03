@@ -190,7 +190,7 @@ class _BookingsTabState extends State<BookingsTab> {
                               Text(
                                 fcfa(b['totalPriceFcfa']),
                                 style: const TextStyle(
-                                  color: senegalGreen,
+                                  color: gologuiTeal,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -248,7 +248,7 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (bg, fg) = switch (status) {
-      'paid' || 'ongoing' || 'completed' => (const Color(0xFFD9F0E3), senegalGreen),
+      'paid' || 'ongoing' || 'completed' => (const Color(0xFFD9F0E3), gologuiTeal),
       'cancelled' || 'rejected' || 'disputed' => (
           const Color(0xFFFBDCDD),
           const Color(0xFFE31B23)

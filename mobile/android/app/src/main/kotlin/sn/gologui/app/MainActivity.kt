@@ -1,4 +1,4 @@
-package sn.sunuyeuf.sunuyeuf
+package sn.gologui.app
 
 import io.flutter.embedding.android.FlutterActivity
 

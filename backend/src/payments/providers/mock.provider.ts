@@ -15,7 +15,7 @@ export class MockPaymentProvider implements PaymentProvider {
   }): Promise<InitiateResult> {
     return {
       aggregatorRef: params.reference,
-      paymentUrl: `https://pay.mock.sunuyeuf.sn/checkout/${params.reference}`,
+      paymentUrl: `https://pay.mock.gologui.sn/checkout/${params.reference}`,
     };
   }
 

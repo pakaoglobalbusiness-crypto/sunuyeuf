@@ -121,7 +121,7 @@ class _ProfileTabState extends State<ProfileTab> {
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        backgroundColor: senegalGreen,
+                        backgroundColor: gologuiTeal,
                         child: Text(
                           (me['name'] ?? '?')[0],
                           style: const TextStyle(color: Colors.white, fontSize: 24),
@@ -154,7 +154,7 @@ class _ProfileTabState extends State<ProfileTab> {
                             ? Icons.verified
                             : Icons.badge_outlined,
                         color: me['kycStatus'] == 'verified'
-                            ? senegalGreen
+                            ? gologuiTeal
                             : Colors.orange,
                       ),
                       title: Text(switch (me['kycStatus']) {
@@ -187,7 +187,7 @@ class _ProfileTabState extends State<ProfileTab> {
                     child: Column(
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.add_home_work, color: senegalGreen),
+                          leading: const Icon(Icons.add_home_work, color: gologuiTeal),
                           title: const Text('Publier une annonce'),
                           subtitle: const Text('Villa ou voiture, en 5 étapes'),
                           trailing: const Icon(Icons.chevron_right),
@@ -199,7 +199,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         ),
                         const Divider(height: 1),
                         ListTile(
-                          leading: const Icon(Icons.inbox, color: senegalGreen),
+                          leading: const Icon(Icons.inbox, color: gologuiTeal),
                           title: const Text('Demandes et locations reçues'),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => Navigator.of(context).push(
@@ -211,7 +211,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         const Divider(height: 1),
                         ListTile(
                           leading: const Icon(Icons.account_balance_wallet,
-                              color: senegalGreen),
+                              color: gologuiTeal),
                           title: const Text('Mes revenus'),
                           subtitle: Text(
                             _payouts.isEmpty

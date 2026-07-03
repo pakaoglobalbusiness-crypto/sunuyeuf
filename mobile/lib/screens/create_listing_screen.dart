@@ -133,7 +133,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
         Text('$value', style: const TextStyle(fontWeight: FontWeight.w700)),
         IconButton(
           onPressed: () => setState(() => onChanged(value + 1)),
-          icon: const Icon(Icons.add_circle_outline, color: senegalGreen),
+          icon: const Icon(Icons.add_circle_outline, color: gologuiTeal),
         ),
       ],
     );
@@ -158,7 +158,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
                 side: BorderSide(
-                  color: _type == value ? senegalGreen : Colors.grey.shade300,
+                  color: _type == value ? gologuiTeal : Colors.grey.shade300,
                   width: _type == value ? 2 : 1,
                 ),
               ),
@@ -292,25 +292,25 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               value: _pool,
               onChanged: (v) => setState(() => _pool = v),
               title: const Text('Piscine'),
-              activeThumbColor: senegalGreen,
+              activeThumbColor: gologuiTeal,
             ),
             SwitchListTile(
               value: _wifi,
               onChanged: (v) => setState(() => _wifi = v),
               title: const Text('Wifi'),
-              activeThumbColor: senegalGreen,
+              activeThumbColor: gologuiTeal,
             ),
             SwitchListTile(
               value: _ac,
               onChanged: (v) => setState(() => _ac = v),
               title: const Text('Climatisation'),
-              activeThumbColor: senegalGreen,
+              activeThumbColor: gologuiTeal,
             ),
             SwitchListTile(
               value: _guard,
               onChanged: (v) => setState(() => _guard = v),
               title: const Text('Gardien'),
-              activeThumbColor: senegalGreen,
+              activeThumbColor: gologuiTeal,
             ),
           ] else ...[
             TextField(
@@ -365,7 +365,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               value: _withDriver,
               onChanged: (v) => setState(() => _withDriver = v),
               title: const Text('Chauffeur possible'),
-              activeThumbColor: senegalGreen,
+              activeThumbColor: gologuiTeal,
             ),
           ],
         ],
@@ -421,7 +421,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
             onChanged: (v) => setState(() => _instant = v),
             title: const Text('Réservation instantanée'),
             subtitle: const Text('Sans validation manuelle de votre part'),
-            activeThumbColor: senegalGreen,
+            activeThumbColor: gologuiTeal,
           ),
           if (int.tryParse(_priceCtrl.text) != null) ...[
             const SizedBox(height: 10),
@@ -433,7 +433,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               ),
               child: Text(
                 'Vous recevrez ${fcfa((int.parse(_priceCtrl.text) * 0.9).round())} '
-                'par jour loué (commission Sunuyeuf : 10 %).',
+                'par jour loué (commission Gologui : 10 %).',
               ),
             ),
           ],
@@ -462,7 +462,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                   Text(
                     '${fcfa(int.tryParse(_priceCtrl.text) ?? 0)} / jour',
                     style: const TextStyle(
-                        color: senegalGreen, fontWeight: FontWeight.w700),
+                        color: gologuiTeal, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),
@@ -490,7 +490,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
         children: [
           LinearProgressIndicator(
             value: (_step + 1) / 5,
-            color: senegalGreen,
+            color: gologuiTeal,
             backgroundColor: Colors.grey.shade200,
           ),
           Expanded(

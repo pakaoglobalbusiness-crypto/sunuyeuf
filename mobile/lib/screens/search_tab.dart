@@ -49,7 +49,7 @@ class _SearchTabState extends State<SearchTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sunuyeuf'),
+        title: const Text('Gologui'),
         actions: [
           IconButton(onPressed: _search, icon: const Icon(Icons.refresh)),
         ],
@@ -57,14 +57,14 @@ class _SearchTabState extends State<SearchTab> {
       body: Column(
         children: [
           Container(
-            color: senegalGreen,
+            color: gologuiTeal,
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Column(
               children: [
                 SegmentedButton<String>(
                   style: SegmentedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    selectedBackgroundColor: senegalYellow,
+                    selectedBackgroundColor: gologuiOrange,
                   ),
                   segments: const [
                     ButtonSegment(value: 'villa', label: Text('🏠 Villas')),
@@ -204,7 +204,7 @@ class _ListingCard extends StatelessWidget {
                       Text(
                         '${fcfa(listing['pricePerDayFcfa'])} / jour',
                         style: const TextStyle(
-                          color: senegalGreen,
+                          color: gologuiTeal,
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
                         ),

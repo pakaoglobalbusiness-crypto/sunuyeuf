@@ -135,7 +135,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(Icons.place, size: 16, color: senegalGreen),
+                    const Icon(Icons.place, size: 16, color: gologuiTeal),
                     Text(
                       ' ${l['city']}${l['district'] != null ? ' · ${l['district']}' : ''}',
                     ),
@@ -198,7 +198,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                 Row(
                   children: [
                     CircleAvatar(
-                      backgroundColor: senegalGreen,
+                      backgroundColor: gologuiTeal,
                       child: Text(
                         (owner['name'] ?? '?')[0],
                         style: const TextStyle(color: Colors.white),
@@ -215,7 +215,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                         if (owner['kycStatus'] == 'verified')
                           const Text(
                             '✓ Identité vérifiée',
-                            style: TextStyle(color: senegalGreen, fontSize: 12),
+                            style: TextStyle(color: gologuiTeal, fontSize: 12),
                           ),
                       ],
                     ),
@@ -252,7 +252,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                             ? 'Choisir les dates'
                             : '$_days jour${_days > 1 ? 's' : ''} · ${fcfa(_days * (l['pricePerDayFcfa'] as num))}',
                         style: const TextStyle(
-                          color: senegalGreen,
+                          color: gologuiTeal,
                           decoration: TextDecoration.underline,
                         ),
                       ),

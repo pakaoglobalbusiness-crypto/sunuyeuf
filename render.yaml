@@ -1,4 +1,4 @@
-# Blueprint Render — déploie toute la plateforme Sunuyeuf en un clic :
+# Blueprint Render — déploie toute la plateforme Gologui en un clic :
 # API NestJS + PostgreSQL + back-office admin + app web mobile.
 # Dashboard Render → New → Blueprint → sélectionner ce dépôt.
 
@@ -9,7 +9,7 @@ databases:
 services:
   # --- API backend ---
   - type: web
-    name: sunuyeuf-api
+    name: gologui-api
     runtime: node
     rootDir: backend
     plan: free # s'endort après 15 min d'inactivité (réveil ~30 s)
@@ -33,14 +33,14 @@ services:
 
   # --- Back-office admin ---
   - type: web
-    name: sunuyeuf-admin
+    name: gologui-admin
     runtime: static
     rootDir: admin
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        value: https://sunuyeuf-api.onrender.com/api/v1
+        value: https://gologui-api.onrender.com/api/v1
     routes:
       - type: rewrite
         source: /*
@@ -48,7 +48,7 @@ services:
 
   # --- App mobile (version web, pré-buildée localement dans webapp/) ---
   - type: web
-    name: sunuyeuf-app
+    name: gologui-app
     runtime: static
     rootDir: webapp
     buildCommand: echo "fichiers pré-buildés par Flutter"

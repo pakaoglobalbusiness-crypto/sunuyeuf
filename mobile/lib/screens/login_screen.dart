@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: senegalGreen,
+      backgroundColor: gologuiTeal,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -69,12 +69,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    '🏠🚗',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 48),
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Image.asset('assets/icon/icon.png', height: 110),
+                    ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 14),
                   RichText(
                     textAlign: TextAlign.center,
                     text: const TextSpan(
@@ -84,8 +85,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Colors.white,
                       ),
                       children: [
-                        TextSpan(text: 'Sunu'),
-                        TextSpan(text: 'yeuf', style: TextStyle(color: senegalYellow)),
+                        TextSpan(text: 'Golo'),
+                        TextSpan(text: 'gui', style: TextStyle(color: gologuiOrange)),
                       ],
                     ),
                   ),

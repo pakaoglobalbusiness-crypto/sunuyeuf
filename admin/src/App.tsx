@@ -55,7 +55,7 @@ function Login() {
     <div className="login-page">
       <div className="login-box">
         <h1>
-          Sunu<span>yeuf</span>
+          Golo<span>gui</span>
         </h1>
         <p>Back-office administration</p>
         {error && <div className="error">{error}</div>}
@@ -378,7 +378,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="layout">
       <nav className="sidebar">
-        <h1>Sunu<span>yeuf</span></h1>
+        <h1>Golo<span>gui</span></h1>
         <NavLink to="/" end>📊 Tableau de bord</NavLink>
         <NavLink to="/moderation">🛡️ Modération</NavLink>
         <NavLink to="/kyc">🪪 KYC</NavLink>

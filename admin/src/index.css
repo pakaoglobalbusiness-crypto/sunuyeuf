@@ -1,8 +1,8 @@
 * { box-sizing: border-box; margin: 0; }
 
 :root {
-  --green: #00853f; /* vert du drapeau sénégalais */
-  --yellow: #fdef42;
+  --green: #0b4f47; /* vert sapin du logo Gologui */
+  --yellow: #f49d37; /* orange du singe */
   --red: #e31b23;
   --bg: #f6f7f4;
   --card: #ffffff;

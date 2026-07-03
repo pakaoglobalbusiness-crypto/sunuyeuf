@@ -19,14 +19,14 @@ const carPhotos = [
 ];
 
 async function main() {
-  console.log('Seed Sunuyeuf…');
+  console.log('Seed Gologui…');
 
   const admin = await prisma.user.upsert({
     where: { phone: '+221770000000' },
     update: { role: 'admin' },
     create: {
       phone: '+221770000000',
-      name: 'Admin Sunuyeuf',
+      name: 'Admin Gologui',
       role: 'admin',
       kycStatus: 'verified',
     },

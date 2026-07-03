@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Client HTTP de l'API Sunuyeuf.
+/// Client HTTP de l'API Gologui.
 /// En dev web/simulateur : localhost. Sur téléphone physique, remplacer
 /// par l'IP locale de la machine qui héberge l'API.
 const apiBase = String.fromEnvironment(

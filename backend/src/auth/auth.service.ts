@@ -46,7 +46,7 @@ export class AuthService {
 
     await this.sms.send(
       normalized,
-      `Sunuyeuf : votre code de connexion est ${code}. Valable ${OTP_TTL_MINUTES} min.`,
+      `Gologui : votre code de connexion est ${code}. Valable ${OTP_TTL_MINUTES} min.`,
     );
     return {
       sent: true,

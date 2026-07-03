@@ -50,7 +50,7 @@ class _OwnerBookingsScreenState extends State<OwnerBookingsScreen> {
     try {
       await Api.post('/bookings/$id/car-checkin', body: {
         'type': type,
-        'photos': ['https://demo.sunuyeuf.sn/checkin/$type.jpg'],
+        'photos': ['https://demo.gologui.sn/checkin/$type.jpg'],
         'km': 45000,
         'fuelLevel': 'plein',
       });
@@ -113,7 +113,7 @@ class _OwnerBookingsScreenState extends State<OwnerBookingsScreen> {
                                 'Vous recevrez ${fcfa(net)} '
                                 '(total ${fcfa(b['totalPriceFcfa'])} − 10 %)',
                                 style: const TextStyle(
-                                  color: senegalGreen,
+                                  color: gologuiTeal,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),

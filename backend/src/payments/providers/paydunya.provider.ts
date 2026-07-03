@@ -40,7 +40,7 @@ export class PayDunyaProvider implements PaymentProvider {
           total_amount: params.amountFcfa,
           description: params.description,
         },
-        store: { name: 'Sunuyeuf' },
+        store: { name: 'Gologui' },
         custom_data: { reference: params.reference },
         actions: {
           callback_url: process.env.PAYMENT_CALLBACK_URL,

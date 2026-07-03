@@ -68,7 +68,7 @@ class _MessagesTabState extends State<MessagesTab> {
                       final last = (c['messages'] as List).firstOrNull;
                       return ListTile(
                         leading: const CircleAvatar(
-                          backgroundColor: senegalGreen,
+                          backgroundColor: gologuiTeal,
                           child: Icon(Icons.person, color: Colors.white),
                         ),
                         title: Text(other),
@@ -173,7 +173,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     constraints: const BoxConstraints(maxWidth: 280),
                     decoration: BoxDecoration(
-                      color: mine ? senegalGreen : Colors.grey.shade200,
+                      color: mine ? gologuiTeal : Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -199,7 +199,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   const SizedBox(width: 8),
                   IconButton.filled(
-                    style: IconButton.styleFrom(backgroundColor: senegalGreen),
+                    style: IconButton.styleFrom(backgroundColor: gologuiTeal),
                     onPressed: _send,
                     icon: const Icon(Icons.send),
                   ),

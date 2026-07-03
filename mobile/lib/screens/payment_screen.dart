@@ -47,7 +47,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       // Agrégateur réel (PayDunya…) : on ouvre sa page de paiement sécurisée ;
       // le polling ci-dessous détecte la confirmation envoyée par le webhook.
       final paymentUrl = res['paymentUrl'] as String?;
-      if (paymentUrl != null && !paymentUrl.contains('pay.mock.sunuyeuf.sn')) {
+      if (paymentUrl != null && !paymentUrl.contains('pay.mock.gologui.sn')) {
         await launchUrl(Uri.parse(paymentUrl), mode: LaunchMode.externalApplication);
       }
       _pollTimer = Timer.periodic(const Duration(seconds: 1), (t) async {
@@ -83,7 +83,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.check_circle, color: senegalGreen, size: 90),
+                    const Icon(Icons.check_circle, color: gologuiTeal, size: 90),
                     const SizedBox(height: 16),
                     const Text(
                       'Paiement confirmé !',
@@ -122,12 +122,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w800,
-                              color: senegalGreen,
+                              color: gologuiTeal,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Fonds sécurisés par Sunuyeuf, versés au propriétaire '
+                            'Fonds sécurisés par Gologui, versés au propriétaire '
                             'après le début de la location.',
                             style: TextStyle(
                               fontSize: 12,
@@ -152,7 +152,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           ? null
                           : (v) => setState(() => _method = v!),
                       title: Text('$emoji  $label'),
-                      activeColor: senegalGreen,
+                      activeColor: gologuiTeal,
                     ),
                   if (_error != null)
                     Padding(

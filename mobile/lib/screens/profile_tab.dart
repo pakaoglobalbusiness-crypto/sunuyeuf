@@ -6,6 +6,7 @@ import '../favorites.dart';
 import '../main.dart';
 import 'create_listing_screen.dart';
 import 'favorites_screen.dart';
+import 'kyc_screen.dart';
 import 'login_screen.dart';
 import 'owner_bookings_screen.dart';
 
@@ -65,18 +66,6 @@ class _ProfileTabState extends State<ProfileTab> {
     }
   }
 
-  Future<String?> _pickAndUpload(String prompt) async {
-    if (!mounted) return null;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(prompt)));
-    final picked = await ImagePicker().pickImage(
-      source: ImageSource.gallery, // caméra sur téléphone, galerie en dev web
-      maxWidth: 1600,
-      imageQuality: 85,
-    );
-    if (picked == null) return null;
-    return Api.uploadBytes(await picked.readAsBytes(), picked.name);
-  }
-
   // Photo de profil : galerie/caméra → upload → PATCH /users/me
   Future<void> _changePhoto() async {
     final picked = await ImagePicker().pickImage(
@@ -88,7 +77,6 @@ class _ProfileTabState extends State<ProfileTab> {
     try {
       final url = await Api.uploadBytes(await picked.readAsBytes(), picked.name);
       await Api.patch('/users/me', body: {'photoUrl': url});
-      // Met à jour la session locale pour l'avatar ailleurs dans l'app
       final me = await Api.get('/users/me');
       Api.currentUser = me;
       if (mounted) {
@@ -105,62 +93,12 @@ class _ProfileTabState extends State<ProfileTab> {
     }
   }
 
-  // Vérification d'identité : recto + verso de la CNI ou du permis de conduire
+  // Vérification d'identité : écran dédié en 3 étapes (KycScreen)
   Future<void> _submitKyc() async {
-    final docType = await showModalBottomSheet<String>(
-      context: context,
-      showDragHandle: true,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Quel document utilisez-vous ?',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 4),
-            ListTile(
-              leading: const Icon(Icons.badge_outlined),
-              title: const Text('Carte nationale d’identité'),
-              onTap: () => Navigator.pop(ctx, 'cni'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.directions_car_outlined),
-              title: const Text('Permis de conduire'),
-              onTap: () => Navigator.pop(ctx, 'permis'),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
+    final sent = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const KycScreen()),
     );
-    if (docType == null) return;
-    final label = docType == 'cni' ? 'votre carte d’identité' : 'votre permis de conduire';
-    try {
-      final rectoUrl = await _pickAndUpload('Photo du RECTO de $label');
-      if (rectoUrl == null) return;
-      final versoUrl = await _pickAndUpload('Maintenant, photo du VERSO de $label');
-      if (versoUrl == null) return;
-      final selfieUrl = await _pickAndUpload('Pour finir, un selfie bien éclairé 🤳');
-      if (selfieUrl == null) return;
-      await Api.post('/users/me/kyc', body: {
-        'documents': [
-          {'type': '${docType}_recto', 'fileUrl': rectoUrl},
-          {'type': '${docType}_verso', 'fileUrl': versoUrl},
-          {'type': 'selfie', 'fileUrl': selfieUrl},
-        ],
-      });
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Documents envoyés ! Vérification sous 24 h.'),
-      ));
-      _load();
-    } on ApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
-      }
-    }
+    if (sent == true) _load();
   }
 
   @override

@@ -93,6 +93,22 @@ class _ProfileTabState extends State<ProfileTab> {
     }
   }
 
+  // Modification d'une annonce : rouvre l'assistant pré-rempli
+  Future<void> _editListing(Map<String, dynamic> listing) async {
+    // On recharge la fiche complète (photos, détails) avant d'éditer
+    Map<String, dynamic> full = listing;
+    try {
+      full = await Api.get('/listings/${listing['id']}');
+    } on ApiException {
+      // à défaut, on édite avec les données déjà en liste
+    }
+    if (!mounted) return;
+    final updated = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => CreateListingScreen(existing: full)),
+    );
+    if (updated == true) _load();
+  }
+
   // Suppression d'une annonce (avec confirmation)
   Future<void> _deleteListing(Map<String, dynamic> listing) async {
     final confirmed = await showDialog<bool>(
@@ -332,11 +348,22 @@ class _ProfileTabState extends State<ProfileTab> {
                               _ => 'Brouillon',
                             }}',
                           ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline,
-                                color: Color(0xFFE31B23)),
-                            tooltip: 'Supprimer',
-                            onPressed: () => _deleteListing(l),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined,
+                                    color: gologuiTeal),
+                                tooltip: 'Modifier',
+                                onPressed: () => _editListing(l),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline,
+                                    color: Color(0xFFE31B23)),
+                                tooltip: 'Supprimer',
+                                onPressed: () => _deleteListing(l),
+                              ),
+                            ],
                           ),
                         ),
                       ),

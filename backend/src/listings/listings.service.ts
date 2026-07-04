@@ -75,6 +75,24 @@ export class ListingsService {
     if (!listing) throw new NotFoundException('Annonce introuvable');
     if (listing.ownerId !== ownerId) throw new ForbiddenException();
     const { villaDetails, carDetails, photoUrls, ...scalars } = dto;
+
+    // Remplacement des photos si fournies (avec respect min/max)
+    if (photoUrls) {
+      const min = listing.type === 'villa' ? 5 : 3;
+      if (photoUrls.length < min) {
+        throw new BadRequestException(
+          `Ajoutez au moins ${min} photos pour ${listing.type === 'villa' ? 'un logement' : 'une voiture'} (${photoUrls.length}/${min})`,
+        );
+      }
+      if (photoUrls.length > 7) {
+        throw new BadRequestException('Maximum 7 photos par annonce');
+      }
+      await this.prisma.listingPhoto.deleteMany({ where: { listingId: id } });
+      await this.prisma.listingPhoto.createMany({
+        data: photoUrls.map((url, order) => ({ listingId: id, url, order })),
+      });
+    }
+
     return this.prisma.listing.update({
       where: { id },
       data: {
@@ -82,7 +100,11 @@ export class ListingsService {
         villaDetails: villaDetails ? { update: villaDetails } : undefined,
         carDetails: carDetails ? { update: carDetails } : undefined,
       },
-      include: { villaDetails: true, carDetails: true, photos: true },
+      include: {
+        villaDetails: true,
+        carDetails: true,
+        photos: { orderBy: { order: 'asc' } },
+      },
     });
   }
 

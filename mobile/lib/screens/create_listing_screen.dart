@@ -7,7 +7,9 @@ import '../main.dart';
 /// Création d'annonce guidée en 5 étapes max (F10) :
 /// type → photos → description → prix → publication.
 class CreateListingScreen extends StatefulWidget {
-  const CreateListingScreen({super.key});
+  // Si existing != null → mode modification (formulaire pré-rempli, PATCH)
+  final Map<String, dynamic>? existing;
+  const CreateListingScreen({super.key, this.existing});
 
   @override
   State<CreateListingScreen> createState() => _CreateListingScreenState();
@@ -17,8 +19,51 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   int _step = 0;
   bool _submitting = false;
 
+  bool get _isEditing => widget.existing != null;
+
   // Étape 1 : type
   String _type = 'villa';
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.existing;
+    if (e == null) return;
+    // Pré-remplissage en mode modification
+    _type = e['type'];
+    _titleCtrl.text = e['title'] ?? '';
+    _descCtrl.text = e['description'] ?? '';
+    _city = e['city'] ?? 'Dakar';
+    _districtCtrl.text = e['district'] ?? '';
+    _priceCtrl.text = '${e['pricePerDayFcfa'] ?? ''}';
+    _depositCtrl.text = '${e['depositFcfa'] ?? 0}';
+    _policy = e['cancellationPolicy'] ?? 'moderate';
+    _instant = e['instantBooking'] ?? false;
+    _photos.addAll(
+      ((e['photos'] as List?) ?? []).map((p) => p['url'] as String),
+    );
+    final v = e['villaDetails'];
+    if (v != null) {
+      _bedrooms = v['bedrooms'] ?? 2;
+      _bathrooms = v['bathrooms'] ?? 1;
+      _capacity = v['capacity'] ?? 4;
+      _pool = v['pool'] ?? false;
+      _wifi = v['wifi'] ?? true;
+      _ac = v['ac'] ?? true;
+      _guard = v['guard'] ?? false;
+    }
+    final c = e['carDetails'];
+    if (c != null) {
+      _brandCtrl.text = c['brand'] ?? '';
+      _yearCtrl.text = '${c['year'] ?? 2022}';
+      _gearbox = c['gearbox'] ?? 'manuelle';
+      _fuel = c['fuel'] ?? 'essence';
+      _delivery = c['deliveryPlace'] ?? 'domicile';
+      _withDriver = c['withDriver'] ?? false;
+    }
+    // On saute l'étape « type » (non modifiable)
+    _step = 1;
+  }
 
   // Étape 2 : photos — galerie/appareil photo, uploadées vers l'API.
   // Minimum 5 (logement) ou 3 (voiture), maximum 7.
@@ -100,47 +145,54 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
 
   Future<void> _submit() async {
     setState(() => _submitting = true);
+    final body = {
+      if (!_isEditing) 'type': _type,
+      'title': _titleCtrl.text,
+      'description': _descCtrl.text,
+      if (!_isEditing) 'city': _city,
+      if (_districtCtrl.text.isNotEmpty) 'district': _districtCtrl.text,
+      'pricePerDayFcfa': int.tryParse(_priceCtrl.text) ?? 0,
+      'depositFcfa': int.tryParse(_depositCtrl.text) ?? 0,
+      'cancellationPolicy': _policy,
+      'instantBooking': _instant,
+      'photoUrls': _photos,
+      if (_type == 'villa')
+        'villaDetails': {
+          'bedrooms': _bedrooms,
+          'bathrooms': _bathrooms,
+          'capacity': _capacity,
+          'pool': _pool,
+          'wifi': _wifi,
+          'ac': _ac,
+          'guard': _guard,
+        },
+      if (_type == 'voiture')
+        'carDetails': {
+          'brand': _brandCtrl.text,
+          'year': int.tryParse(_yearCtrl.text) ?? 2020,
+          'gearbox': _gearbox,
+          'fuel': _fuel,
+          'withDriver': _withDriver,
+          'kmIncludedDay': 200,
+          'deliveryPlace': _delivery,
+        },
+    };
     try {
-      await Api.post('/listings', body: {
-        'type': _type,
-        'title': _titleCtrl.text,
-        'description': _descCtrl.text,
-        'city': _city,
-        if (_districtCtrl.text.isNotEmpty) 'district': _districtCtrl.text,
-        'pricePerDayFcfa': int.tryParse(_priceCtrl.text) ?? 0,
-        'depositFcfa': int.tryParse(_depositCtrl.text) ?? 0,
-        'cancellationPolicy': _policy,
-        'instantBooking': _instant,
-        'photoUrls': _photos,
-        if (_type == 'villa')
-          'villaDetails': {
-            'bedrooms': _bedrooms,
-            'bathrooms': _bathrooms,
-            'capacity': _capacity,
-            'pool': _pool,
-            'wifi': _wifi,
-            'ac': _ac,
-            'guard': _guard,
-          },
-        if (_type == 'voiture')
-          'carDetails': {
-            'brand': _brandCtrl.text,
-            'year': int.tryParse(_yearCtrl.text) ?? 2020,
-            'gearbox': _gearbox,
-            'fuel': _fuel,
-            'withDriver': _withDriver,
-            'kmIncludedDay': 200,
-            'deliveryPlace': _delivery,
-          },
-      });
+      if (_isEditing) {
+        await Api.patch('/listings/${widget.existing!['id']}', body: body);
+      } else {
+        await Api.post('/listings', body: body);
+      }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
-          'Annonce envoyée en modération ! Elle sera en ligne après validation '
-          'par notre équipe.',
+          _isEditing
+              ? 'Annonce mise à jour ✓'
+              : 'Annonce envoyée en modération ! Elle sera en ligne après '
+                  'validation par notre équipe.',
         ),
       ));
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
     } on ApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -576,7 +628,11 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
     };
 
     return Scaffold(
-      appBar: AppBar(title: Text('Nouvelle annonce — étape ${_step + 1}/5')),
+      appBar: AppBar(
+        title: Text(_isEditing
+            ? 'Modifier l’annonce'
+            : 'Nouvelle annonce — étape ${_step + 1}/5'),
+      ),
       body: Column(
         children: [
           LinearProgressIndicator(
@@ -595,14 +651,15 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  if (_step > 0)
+                  // En modification, on ne redescend pas sous l'étape 1 (type figé)
+                  if (_step > (_isEditing ? 1 : 0))
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => setState(() => _step--),
                         child: const Text('Retour'),
                       ),
                     ),
-                  if (_step > 0) const SizedBox(width: 12),
+                  if (_step > (_isEditing ? 1 : 0)) const SizedBox(width: 12),
                   Expanded(
                     flex: 2,
                     child: FilledButton(
@@ -613,7 +670,11 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                               : () => setState(() => _step++),
                       child: Text(
                         _step == 4
-                            ? (_submitting ? 'Envoi…' : 'Publier l’annonce')
+                            ? (_submitting
+                                ? 'Enregistrement…'
+                                : (_isEditing
+                                    ? 'Enregistrer les modifications'
+                                    : 'Publier l’annonce'))
                             : 'Continuer',
                       ),
                     ),

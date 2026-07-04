@@ -163,10 +163,39 @@ export class ListingsService {
 
   async myListings(ownerId: string) {
     return this.prisma.listing.findMany({
-      where: { ownerId },
+      where: { ownerId, status: { not: 'archived' } },
       include: { photos: true, villaDetails: true, carDetails: true },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  // Suppression d'une annonce. Si des réservations existent (historique,
+  // paiements), on archive plutôt que détruire ; sinon suppression réelle.
+  // isAdmin = true permet à l'admin de supprimer n'importe quelle annonce.
+  async remove(userId: string, listingId: string, isAdmin = false) {
+    const listing = await this.prisma.listing.findUnique({
+      where: { id: listingId },
+      include: { _count: { select: { bookings: true } } },
+    });
+    if (!listing) throw new NotFoundException('Annonce introuvable');
+    if (!isAdmin && listing.ownerId !== userId) throw new ForbiddenException();
+
+    if (listing._count.bookings > 0) {
+      await this.prisma.listing.update({
+        where: { id: listingId },
+        data: { status: 'archived' },
+      });
+      return { deleted: false, archived: true };
+    }
+
+    // Aucune réservation : suppression réelle (enfants d'abord)
+    await this.prisma.favorite.deleteMany({ where: { listingId } });
+    await this.prisma.availability.deleteMany({ where: { listingId } });
+    await this.prisma.listingPhoto.deleteMany({ where: { listingId } });
+    await this.prisma.villaDetails.deleteMany({ where: { listingId } });
+    await this.prisma.carDetails.deleteMany({ where: { listingId } });
+    await this.prisma.listing.delete({ where: { id: listingId } });
+    return { deleted: true, archived: false };
   }
 
   // Favoris (wishlist type Airbnb)

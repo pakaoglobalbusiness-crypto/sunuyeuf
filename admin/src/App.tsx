@@ -165,6 +165,12 @@ function Moderation() {
     load();
   };
 
+  const remove = async (id: string, title: string) => {
+    if (!window.confirm(`Supprimer définitivement « ${title} » ?`)) return;
+    await api(`/listings/${id}`, { method: 'DELETE' });
+    load();
+  };
+
   return (
     <>
       <h2>Annonces en modération</h2>
@@ -188,7 +194,8 @@ function Moderation() {
           <p style={{ fontSize: 14, marginBottom: 12 }}>{l.description}</p>
           <div className="row">
             <button className="primary" onClick={() => decide(l.id, 'approve')}>Publier</button>
-            <button className="danger" onClick={() => decide(l.id, 'reject')}>Refuser</button>
+            <button className="neutral" onClick={() => decide(l.id, 'reject')}>Refuser</button>
+            <button className="danger" onClick={() => remove(l.id, l.title)}>Supprimer</button>
           </div>
         </div>
       ))}

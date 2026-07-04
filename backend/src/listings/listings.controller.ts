@@ -86,6 +86,13 @@ export class ListingsController {
     return this.listings.update(user.id, id, dto);
   }
 
+  // Suppression d'une annonce par son propriétaire (ou un admin)
+  @Delete(':id')
+  @UseGuards(AuthGuard)
+  remove(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.listings.remove(user.id, id, user.role === 'admin');
+  }
+
   @Post(':id/availability')
   @UseGuards(AuthGuard)
   setAvailability(

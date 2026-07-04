@@ -93,6 +93,46 @@ class _ProfileTabState extends State<ProfileTab> {
     }
   }
 
+  // Suppression d'une annonce (avec confirmation)
+  Future<void> _deleteListing(Map<String, dynamic> listing) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer cette annonce ?'),
+        content: Text(
+          '« ${listing['title']} » sera retirée de Gologui. '
+          'Si elle a déjà des réservations, elle sera archivée '
+          '(l’historique est conservé).',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFE31B23)),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await Api.delete('/listings/${listing['id']}');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Annonce supprimée')),
+      );
+      _load();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
+  }
+
   // Vérification d'identité : écran dédié en 3 étapes (KycScreen)
   Future<void> _submitKyc() async {
     final sent = await Navigator.of(context).push<bool>(
@@ -291,6 +331,12 @@ class _ProfileTabState extends State<ProfileTab> {
                               'suspended' => 'Suspendue',
                               _ => 'Brouillon',
                             }}',
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline,
+                                color: Color(0xFFE31B23)),
+                            tooltip: 'Supprimer',
+                            onPressed: () => _deleteListing(l),
                           ),
                         ),
                       ),

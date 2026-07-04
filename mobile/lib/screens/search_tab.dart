@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../api.dart';
-import '../senegal_data.dart';
 import '../favorites.dart';
 import '../widgets/listing_card.dart';
+import 'filter_sheet.dart';
 import 'listing_detail_screen.dart';
 
-/// Accueil / Explorer — design épuré : salutation, type, ville, budget,
-/// cartes immersives avec favoris (F2).
+/// Accueil / Explorer — type, filtres avancés, cartes immersives (F2).
 class SearchTab extends StatefulWidget {
   const SearchTab({super.key});
 
@@ -17,12 +16,10 @@ class SearchTab extends StatefulWidget {
 
 class _SearchTabState extends State<SearchTab> {
   String _type = 'villa';
-  String? _city;
-  int? _maxPrice;
+  Filters _filters = Filters();
   List<dynamic> _items = [];
   bool _loading = true;
   String? _error;
-
 
   @override
   void initState() {
@@ -34,16 +31,28 @@ class _SearchTabState extends State<SearchTab> {
   Future<void> _search() async {
     setState(() => (_loading = true, _error = null));
     try {
-      final res = await Api.get('/listings', query: {
-        'type': _type,
-        if (_city != null) 'city': _city!,
-        if (_maxPrice != null) 'maxPrice': '$_maxPrice',
-      });
+      final res = await Api.get('/listings', query: _filters.toQuery(_type));
       setState(() => _items = res['items']);
     } on ApiException catch (e) {
       setState(() => _error = e.message);
     } finally {
       setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _openFilters() async {
+    final result = await showModalBottomSheet<Filters>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => FilterSheet(filters: _filters, type: _type),
+    );
+    if (result != null) {
+      _filters = result;
+      _search();
     }
   }
 
@@ -152,72 +161,44 @@ class _SearchTabState extends State<SearchTab> {
                         ),
                       ),
                       const SizedBox(height: 14),
-                      // Filtres : villes puis budget
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _FilterChip(
-                              label: 'Partout',
-                              selected: _city == null,
-                              onTap: () {
-                                _city = null;
+                      // Bouton Filtres (avec compteur) + résumé
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _openFilters,
+                              icon: const Icon(Icons.tune, size: 20),
+                              label: Text(
+                                _filters.count(_type) == 0
+                                    ? 'Filtres'
+                                    : 'Filtres (${_filters.count(_type)})',
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(48),
+                                foregroundColor: _filters.count(_type) > 0
+                                    ? scheme.primary
+                                    : scheme.onSurface,
+                                side: BorderSide(
+                                  color: _filters.count(_type) > 0
+                                      ? scheme.primary
+                                      : scheme.outlineVariant,
+                                  width: _filters.count(_type) > 0 ? 1.5 : 1,
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (_filters.count(_type) > 0) ...[
+                            const SizedBox(width: 8),
+                            IconButton(
+                              tooltip: 'Effacer les filtres',
+                              onPressed: () {
+                                setState(() => _filters = Filters());
                                 _search();
                               },
-                            ),
-                            for (final c in Senegal.regions)
-                              _FilterChip(
-                                label: c,
-                                selected: _city == c,
-                                onTap: () {
-                                  _city = c;
-                                  _search();
-                                },
-                              ),
-                            const SizedBox(width: 6),
-                            _FilterChip(
-                              label: _maxPrice == null
-                                  ? '💰 Budget'
-                                  : '≤ ${fcfa(_maxPrice!)}',
-                              selected: _maxPrice != null,
-                              onTap: () async {
-                                final v = await showModalBottomSheet<int?>(
-                                  context: context,
-                                  showDragHandle: true,
-                                  builder: (ctx) => SafeArea(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Text(
-                                          'Budget max par jour',
-                                          style: TextStyle(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        for (final (v, label) in [
-                                          (null, 'Illimité'),
-                                          (25000, '25 000 FCFA'),
-                                          (50000, '50 000 FCFA'),
-                                          (100000, '100 000 FCFA'),
-                                        ])
-                                          ListTile(
-                                            title: Text(label, textAlign: TextAlign.center),
-                                            onTap: () => Navigator.pop(ctx, v ?? -1),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                                if (v != null) {
-                                  _maxPrice = v == -1 ? null : v;
-                                  _search();
-                                }
-                              },
+                              icon: const Icon(Icons.close),
                             ),
                           ],
-                        ),
+                        ],
                       ),
                       const SizedBox(height: 6),
                     ],
@@ -259,39 +240,3 @@ class _SearchTabState extends State<SearchTab> {
   }
 }
 
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _FilterChip({required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-          decoration: BoxDecoration(
-            color: selected ? scheme.primary : scheme.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: selected ? scheme.primary : scheme.outlineVariant,
-            ),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: selected ? scheme.onPrimary : scheme.onSurface,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              fontSize: 13.5,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

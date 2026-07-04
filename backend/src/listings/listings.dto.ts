@@ -69,12 +69,28 @@ export class UpdateListingDto {
 
 export class SearchListingsDto {
   @IsOptional() @IsIn(LISTING_TYPES as unknown as string[]) type?: string;
-  @IsOptional() @IsString() city?: string;
+  @IsOptional() @IsString() city?: string; // = région
+  @IsOptional() @IsString() department?: string;
+  @IsOptional() @IsString() commune?: string;
   @IsOptional() @IsString() q?: string;
   @IsOptional() @Type(() => Number) @IsInt() minPrice?: number;
   @IsOptional() @Type(() => Number) @IsInt() maxPrice?: number;
+  @IsOptional() @Type(() => Number) @IsNumber() minRating?: number;
+  @IsOptional() @IsIn(['true', 'false']) instant?: string;
   @IsOptional() @IsString() startDate?: string;
   @IsOptional() @IsString() endDate?: string;
+  // Logements
+  @IsOptional() @Type(() => Number) @IsInt() minBedrooms?: number;
+  @IsOptional() @Type(() => Number) @IsInt() minCapacity?: number;
+  @IsOptional() @IsIn(['true', 'false']) pool?: string;
+  @IsOptional() @IsIn(['true', 'false']) wifi?: string;
+  @IsOptional() @IsIn(['true', 'false']) ac?: string;
+  @IsOptional() @IsIn(['true', 'false']) guard?: string;
+  // Voitures
+  @IsOptional() @IsString() brand?: string;
+  @IsOptional() @IsIn(['manuelle', 'automatique']) gearbox?: string;
+  @IsOptional() @IsIn(['essence', 'diesel', 'hybride', 'electrique']) fuel?: string;
+  @IsOptional() @IsIn(['true', 'false']) withDriver?: string;
   @IsOptional() @IsIn(['price_asc', 'price_desc', 'rating']) sort?: string;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) pageSize?: number;

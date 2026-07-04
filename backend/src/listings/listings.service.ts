@@ -113,11 +113,15 @@ export class ListingsService {
   async search(dto: SearchListingsDto) {
     const where: any = { status: 'published' };
     if (dto.type) where.type = dto.type;
-    if (dto.city) where.city = dto.city;
+    if (dto.city) where.city = dto.city; // région
+    if (dto.department) where.department = dto.department;
+    if (dto.commune) where.commune = dto.commune;
     if (dto.maxPrice) where.pricePerDayFcfa = { lte: dto.maxPrice };
     if (dto.minPrice) {
       where.pricePerDayFcfa = { ...(where.pricePerDayFcfa ?? {}), gte: dto.minPrice };
     }
+    if (dto.minRating) where.avgRating = { gte: dto.minRating };
+    if (dto.instant === 'true') where.instantBooking = true;
     if (dto.q) {
       where.OR = [
         { title: { contains: dto.q } },
@@ -125,6 +129,24 @@ export class ListingsService {
         { district: { contains: dto.q } },
       ];
     }
+
+    // Filtres logements (relation villaDetails)
+    const villa: any = {};
+    if (dto.minBedrooms) villa.bedrooms = { gte: dto.minBedrooms };
+    if (dto.minCapacity) villa.capacity = { gte: dto.minCapacity };
+    if (dto.pool === 'true') villa.pool = true;
+    if (dto.wifi === 'true') villa.wifi = true;
+    if (dto.ac === 'true') villa.ac = true;
+    if (dto.guard === 'true') villa.guard = true;
+    if (Object.keys(villa).length) where.villaDetails = { is: villa };
+
+    // Filtres voitures (relation carDetails)
+    const car: any = {};
+    if (dto.brand) car.brand = { contains: dto.brand };
+    if (dto.gearbox) car.gearbox = dto.gearbox;
+    if (dto.fuel) car.fuel = dto.fuel;
+    if (dto.withDriver === 'true') car.withDriver = true;
+    if (Object.keys(car).length) where.carDetails = { is: car };
     // Exclut les annonces ayant au moins un jour indisponible sur la période
     if (dto.startDate && dto.endDate) {
       where.NOT = {

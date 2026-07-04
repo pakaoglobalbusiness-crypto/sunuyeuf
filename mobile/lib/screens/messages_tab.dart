@@ -133,20 +133,24 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _send() async {
     final body = _ctrl.text.trim();
     if (body.isEmpty) return;
-    _ctrl.clear();
     try {
       await Api.post(
         '/conversations/${widget.conversationId}/messages',
         body: {'body': body},
       );
+      _ctrl.clear(); // on n'efface qu'après un envoi réussi
       await _load();
       if (_scrollCtrl.hasClients) {
         _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
       }
     } on ApiException catch (e) {
+      // message conservé pour correction (ex. numéro de téléphone refusé)
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e.message),
+          backgroundColor: const Color(0xFFE31B23),
+          duration: const Duration(seconds: 4),
+        ));
       }
     }
   }

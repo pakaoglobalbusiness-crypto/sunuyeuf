@@ -1,12 +1,31 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 
-// Messagerie liée à une réservation (F6). Le numéro de téléphone reste masqué :
-// seule la conversation interne permet le contact avant confirmation (spec §7).
+// Détecte un numéro de téléphone dans un message, y compris les tentatives
+// de contournement (chiffres espacés/séparés). Objectif : empêcher les
+// échanges hors plateforme (spec §7). Un prix comme « 150 000 » (6 chiffres)
+// n'est pas bloqué ; un numéro sénégalais fait 9 chiffres.
+export function containsPhoneNumber(text: string): boolean {
+  // 1) Séquences de chiffres (éventuellement séparés par espaces/./-/… )
+  const candidates = text.match(/\+?\d[\d\s.\-/_()]{6,}\d/g) ?? [];
+  for (const c of candidates) {
+    if (c.replace(/\D/g, '').length >= 8) return true;
+  }
+  // 2) Préfixe international sénégalais explicite
+  if (/\+\s*221/.test(text)) return true;
+  // 3) Chiffres écrits en toutes lettres, en série (ex. « sept sept un deux »)
+  const words =
+    /\b(zero|z[ée]ro|un|deux|trois|quatre|cinq|six|sept|huit|neuf)\b/gi;
+  const wordMatches = text.match(words) ?? [];
+  if (wordMatches.length >= 7) return true;
+  return false;
+}
+
 @Injectable()
 export class MessagesService {
   constructor(private prisma: PrismaService) {}
@@ -58,6 +77,12 @@ export class MessagesService {
 
   async send(userId: string, conversationId: string, body: string, photoUrl?: string) {
     await this.assertParticipant(conversationId, userId);
+    if (containsPhoneNumber(body)) {
+      throw new BadRequestException(
+        'Pour votre sécurité, le partage de numéros de téléphone n’est pas '
+          + 'autorisé. Gardez vos échanges et paiements sur Gologui.',
+      );
+    }
     const message = await this.prisma.message.create({
       data: { conversationId, senderId: userId, body, photoUrl },
       include: { sender: { select: { id: true, name: true, photoUrl: true } } },

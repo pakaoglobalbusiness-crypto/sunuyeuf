@@ -75,6 +75,45 @@ class _BookingsTabState extends State<BookingsTab> {
     }
   }
 
+  // Retirer une réservation terminée de la liste
+  Future<void> _hide(Map<String, dynamic> b) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Retirer de la liste ?'),
+        content: const Text(
+          'Cette réservation disparaîtra de votre liste. '
+          'L’historique reste conservé côté propriétaire.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFE31B23)),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Retirer'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await Api.delete('/bookings/${b['id']}');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Réservation retirée')),
+      );
+      _load();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
+  }
+
   Future<void> _review(Map<String, dynamic> b) async {
     int rating = 5;
     final commentCtrl = TextEditingController();
@@ -226,6 +265,19 @@ class _BookingsTabState extends State<BookingsTab> {
                                       child: const Text(
                                         'Annuler',
                                         style: TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  // Réservations terminées : retirer de la liste
+                                  if (['completed', 'cancelled', 'rejected',
+                                          'expired']
+                                      .contains(status))
+                                    TextButton.icon(
+                                      onPressed: () => _hide(b),
+                                      icon: const Icon(Icons.delete_outline,
+                                          size: 18, color: Color(0xFFE31B23)),
+                                      label: const Text(
+                                        'Retirer',
+                                        style: TextStyle(color: Color(0xFFE31B23)),
                                       ),
                                     ),
                                 ],

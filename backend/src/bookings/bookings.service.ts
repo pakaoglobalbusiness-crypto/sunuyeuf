@@ -220,10 +220,29 @@ export class BookingsService {
   async myBookings(userId: string) {
     await this.refreshStatuses({ renterId: userId });
     return this.prisma.booking.findMany({
-      where: { renterId: userId },
+      where: { renterId: userId, hiddenByRenter: false },
       include: { listing: { include: { photos: true } }, payments: true },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  // Retirer une réservation de la liste du locataire (uniquement une
+  // réservation terminée/annulée/refusée/expirée — les actives doivent
+  // d'abord être annulées). L'enregistrement reste pour le propriétaire.
+  async hideBooking(userId: string, bookingId: string) {
+    const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } });
+    if (!booking) throw new NotFoundException('Réservation introuvable');
+    if (booking.renterId !== userId) throw new ForbiddenException();
+    if (!['completed', 'cancelled', 'rejected', 'expired'].includes(booking.status)) {
+      throw new BadRequestException(
+        'Annulez d’abord cette réservation avant de la retirer de votre liste',
+      );
+    }
+    await this.prisma.booking.update({
+      where: { id: bookingId },
+      data: { hiddenByRenter: true },
+    });
+    return { hidden: true };
   }
 
   async ownerBookings(ownerId: string) {

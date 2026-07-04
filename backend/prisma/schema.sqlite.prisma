@@ -142,6 +142,7 @@ model Booking {
   totalPriceFcfa     Int
   commissionFcfa     Int
   status             String   @default("requested") // requested | accepted | paid | ongoing | completed | cancelled | disputed | rejected | expired
+  hiddenByRenter     Boolean  @default(false)
   cancellationPolicy String // figée à la réservation
   createdAt          DateTime @default(now())
 

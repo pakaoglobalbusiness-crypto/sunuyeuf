@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -62,6 +63,11 @@ export class BookingsController {
   @Post(':id/respond')
   respond(@CurrentUser() user: any, @Param('id') id: string, @Body() dto: RespondDto) {
     return this.bookings.respond(user.id, id, dto.action);
+  }
+
+  @Delete(':id')
+  hide(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.bookings.hideBooking(user.id, id);
   }
 
   @Post(':id/cancel')

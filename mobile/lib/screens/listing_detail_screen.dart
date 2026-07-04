@@ -186,7 +186,11 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                       if (villa['guard'] == true) const _Chip('💂 Gardien'),
                     ],
                     if (car != null) ...[
-                      _Chip('${car['brand']} ${car['model']} ${car['year']}'),
+                      _Chip([
+                        car['brand'],
+                        car['model'],
+                        car['year'],
+                      ].where((e) => e != null && '$e'.isNotEmpty).join(' ')),
                       _Chip('⚙️ ${car['gearbox']}'),
                       _Chip('⛽ ${car['fuel']}'),
                       if (car['withDriver'] == true) const _Chip('🧑‍✈️ Chauffeur possible'),

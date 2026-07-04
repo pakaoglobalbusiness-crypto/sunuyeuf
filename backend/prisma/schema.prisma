@@ -108,7 +108,7 @@ model CarDetails {
   listingId      String  @id
   listing        Listing @relation(fields: [listingId], references: [id])
   brand          String
-  model          String
+  model          String?
   year           Int
   gearbox        String // manuelle | automatique
   fuel           String // essence | diesel | hybride | electrique

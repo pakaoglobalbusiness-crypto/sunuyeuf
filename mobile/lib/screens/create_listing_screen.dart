@@ -86,7 +86,6 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   bool _pool = false, _wifi = true, _ac = true, _guard = false;
   // Voiture
   final _brandCtrl = TextEditingController();
-  final _modelCtrl = TextEditingController();
   final _yearCtrl = TextEditingController(text: '2022');
   String _gearbox = 'manuelle', _fuel = 'essence', _delivery = 'domicile';
   bool _withDriver = false;
@@ -126,7 +125,6 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
         if (_type == 'voiture')
           'carDetails': {
             'brand': _brandCtrl.text,
-            'model': _modelCtrl.text,
             'year': int.tryParse(_yearCtrl.text) ?? 2020,
             'gearbox': _gearbox,
             'fuel': _fuel,
@@ -336,12 +334,14 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
           const SizedBox(height: 16),
           TextField(
             controller: _titleCtrl,
+            onChanged: (_) => setState(() {}),
             decoration: const InputDecoration(labelText: 'Titre de l’annonce'),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _descCtrl,
             maxLines: 4,
+            onChanged: (_) => setState(() {}),
             decoration: const InputDecoration(labelText: 'Description'),
           ),
           const SizedBox(height: 12),
@@ -362,6 +362,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               Expanded(
                 child: TextField(
                   controller: _districtCtrl,
+                  onChanged: (_) => setState(() {}),
                   decoration: const InputDecoration(labelText: 'Quartier'),
                 ),
               ),
@@ -399,17 +400,14 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
           ] else ...[
             TextField(
               controller: _brandCtrl,
+              onChanged: (_) => setState(() {}),
               decoration: const InputDecoration(labelText: 'Marque'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _modelCtrl,
-              decoration: const InputDecoration(labelText: 'Modèle'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _yearCtrl,
               keyboardType: TextInputType.number,
+              onChanged: (_) => setState(() {}),
               decoration: const InputDecoration(labelText: 'Année'),
             ),
             const SizedBox(height: 12),
@@ -563,9 +561,16 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
       ),
     ];
 
+    // Champs obligatoires par étape : le bouton reste bloqué tant qu'ils
+    // ne sont pas remplis.
     final canNext = switch (_step) {
       1 => _photos.length >= _minPhotos && _photos.length <= 7,
-      2 => _titleCtrl.text.isNotEmpty && _descCtrl.text.isNotEmpty,
+      2 => _titleCtrl.text.trim().isNotEmpty &&
+          _descCtrl.text.trim().isNotEmpty &&
+          _districtCtrl.text.trim().isNotEmpty &&
+          (_type == 'villa' ||
+              (_brandCtrl.text.trim().isNotEmpty &&
+                  (int.tryParse(_yearCtrl.text) ?? 0) >= 1990)),
       3 => (int.tryParse(_priceCtrl.text) ?? 0) >= 1000,
       _ => true,
     };

@@ -24,7 +24,7 @@ export class VillaDetailsDto {
 
 export class CarDetailsDto {
   @IsString() @IsNotEmpty() brand!: string;
-  @IsString() @IsNotEmpty() model!: string;
+  @IsOptional() @IsString() model?: string;
   @IsInt() @Min(1990) year!: number;
   @IsIn(['manuelle', 'automatique']) gearbox!: string;
   @IsIn(['essence', 'diesel', 'hybride', 'electrique']) fuel!: string;

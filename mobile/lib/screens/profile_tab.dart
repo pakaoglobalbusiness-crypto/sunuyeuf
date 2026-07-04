@@ -8,7 +8,9 @@ import 'create_listing_screen.dart';
 import 'favorites_screen.dart';
 import 'kyc_screen.dart';
 import 'login_screen.dart';
+import 'my_listings_screen.dart';
 import 'owner_bookings_screen.dart';
+import 'revenue_screen.dart';
 
 /// Profil + bascule de rôle propriétaire (tout dans la même app, spec §2.3) :
 /// KYC (F15), mes annonces (F10-F11), demandes reçues (F12), revenus (F13-F14).
@@ -21,7 +23,7 @@ class ProfileTab extends StatefulWidget {
 
 class _ProfileTabState extends State<ProfileTab> {
   Map<String, dynamic>? _me;
-  List<dynamic> _myListings = [];
+  int _listingsCount = 0;
   List<dynamic> _payouts = [];
 
   @override
@@ -38,7 +40,7 @@ class _ProfileTabState extends State<ProfileTab> {
       if (mounted) {
         setState(() {
           _me = me;
-          _myListings = listings;
+          _listingsCount = (listings as List).length;
           _payouts = payouts;
         });
       }
@@ -85,62 +87,6 @@ class _ProfileTabState extends State<ProfileTab> {
           const SnackBar(content: Text('Photo de profil mise à jour ✓')),
         );
       }
-    } on ApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
-      }
-    }
-  }
-
-  // Modification d'une annonce : rouvre l'assistant pré-rempli
-  Future<void> _editListing(Map<String, dynamic> listing) async {
-    // On recharge la fiche complète (photos, détails) avant d'éditer
-    Map<String, dynamic> full = listing;
-    try {
-      full = await Api.get('/listings/${listing['id']}');
-    } on ApiException {
-      // à défaut, on édite avec les données déjà en liste
-    }
-    if (!mounted) return;
-    final updated = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => CreateListingScreen(existing: full)),
-    );
-    if (updated == true) _load();
-  }
-
-  // Suppression d'une annonce (avec confirmation)
-  Future<void> _deleteListing(Map<String, dynamic> listing) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Supprimer cette annonce ?'),
-        content: Text(
-          '« ${listing['title']} » sera retirée de Gologui. '
-          'Si elle a déjà des réservations, elle sera archivée '
-          '(l’historique est conservé).',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Annuler'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFE31B23)),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Supprimer'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    try {
-      await Api.delete('/listings/${listing['id']}');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Annonce supprimée')),
-      );
-      _load();
     } on ApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -302,6 +248,19 @@ class _ProfileTabState extends State<ProfileTab> {
                         ),
                         const Divider(height: 1),
                         ListTile(
+                          leading: const Icon(Icons.home_work_outlined,
+                              color: gologuiTeal),
+                          title: const Text('Mes annonces'),
+                          subtitle: Text('${_listingsCount} annonce(s)'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => Navigator.of(context)
+                              .push(MaterialPageRoute(
+                                builder: (_) => const MyListingsScreen(),
+                              ))
+                              .then((_) => _load()),
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
                           leading: const Icon(Icons.inbox, color: gologuiTeal),
                           title: const Text('Demandes et locations reçues'),
                           trailing: const Icon(Icons.chevron_right),
@@ -319,55 +278,18 @@ class _ProfileTabState extends State<ProfileTab> {
                           subtitle: Text(
                             _payouts.isEmpty
                                 ? 'Aucun versement pour le moment'
-                                : 'Total : ${fcfa(totalEarned)} · versés sur Wave',
+                                : 'Total : ${fcfa(totalEarned)}',
                           ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => Navigator.of(context)
+                              .push(MaterialPageRoute(
+                                builder: (_) => const RevenueScreen(),
+                              ))
+                              .then((_) => _load()),
                         ),
                       ],
                     ),
                   ),
-                  if (_myListings.isNotEmpty) ...[
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Mes annonces',
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 10),
-                    for (final l in _myListings)
-                      Card(
-                        child: ListTile(
-                          leading: Text(
-                            l['type'] == 'villa' ? '🏠' : '🚗',
-                            style: const TextStyle(fontSize: 24),
-                          ),
-                          title: Text(l['title'], maxLines: 1),
-                          subtitle: Text(
-                            '${fcfa(l['pricePerDayFcfa'])}/jour · ${switch (l['status']) {
-                              'published' => 'En ligne ✓',
-                              'in_moderation' => 'En modération…',
-                              'suspended' => 'Suspendue',
-                              _ => 'Brouillon',
-                            }}',
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit_outlined,
-                                    color: gologuiTeal),
-                                tooltip: 'Modifier',
-                                onPressed: () => _editListing(l),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline,
-                                    color: Color(0xFFE31B23)),
-                                tooltip: 'Supprimer',
-                                onPressed: () => _deleteListing(l),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
                   const SizedBox(height: 24),
                   OutlinedButton.icon(
                     onPressed: () async {

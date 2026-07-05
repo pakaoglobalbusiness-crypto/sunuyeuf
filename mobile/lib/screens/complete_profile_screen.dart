@@ -7,6 +7,7 @@ import 'terms_screen.dart';
 
 /// Complétion obligatoire du profil juste après l'OTP :
 /// prénom + nom requis, e-mail optionnel. Le téléphone vient de l'OTP.
+/// Style identique à l'écran de connexion (fond vert, logo, carte).
 class CompleteProfileScreen extends StatefulWidget {
   const CompleteProfileScreen({super.key});
 
@@ -46,7 +47,6 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       final me = await Api.get('/users/me');
       Api.currentUser = me;
       if (!mounted) return;
-      // Puis conditions d'utilisation si pas encore acceptées
       final termsOk = me['acceptedTermsAt'] != null;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
@@ -65,72 +65,107 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return PopScope(
       canPop: false,
       child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: const Text('Votre profil'),
-        ),
-        body: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            const SizedBox(height: 8),
-            const Text(
-              'Faisons connaissance 👋',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Ces informations rassurent les autres utilisateurs et sont '
-              'nécessaires pour réserver ou publier.',
-              style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.6)),
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _firstCtrl,
-              onChanged: (_) => setState(() {}),
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Prénom *',
-                prefixIcon: Icon(Icons.badge_outlined),
+        backgroundColor: gologuiTeal,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: Image.asset('assets/icon/icon.png', height: 90),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Faisons connaissance 👋',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Ces informations rassurent les autres utilisateurs.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white70, fontSize: 15),
+                    ),
+                    const SizedBox(height: 32),
+                    Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            TextField(
+                              controller: _firstCtrl,
+                              onChanged: (_) => setState(() {}),
+                              textCapitalization: TextCapitalization.words,
+                              decoration: const InputDecoration(
+                                labelText: 'Prénom *',
+                                prefixIcon: Icon(Icons.badge_outlined),
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            TextField(
+                              controller: _lastCtrl,
+                              onChanged: (_) => setState(() {}),
+                              textCapitalization: TextCapitalization.words,
+                              decoration: const InputDecoration(
+                                labelText: 'Nom *',
+                                prefixIcon: Icon(Icons.badge_outlined),
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            TextField(
+                              controller: _emailCtrl,
+                              onChanged: (_) => setState(() => _emailError = null),
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: InputDecoration(
+                                labelText: 'E-mail (optionnel)',
+                                prefixIcon: const Icon(Icons.mail_outline),
+                                errorText: _emailError,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Votre numéro (${Api.currentUser?['phone'] ?? ''}) '
+                              'est déjà vérifié.',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.55),
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            FilledButton(
+                              onPressed: !_valid || _saving ? null : _save,
+                              child: Text(_saving ? 'Un instant…' : 'Continuer'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: _lastCtrl,
-              onChanged: (_) => setState(() {}),
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Nom *',
-                prefixIcon: Icon(Icons.badge_outlined),
-              ),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: _emailCtrl,
-              onChanged: (_) => setState(() => _emailError = null),
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                labelText: 'E-mail (optionnel)',
-                prefixIcon: const Icon(Icons.mail_outline),
-                errorText: _emailError,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Votre numéro de téléphone (${Api.currentUser?['phone'] ?? ''}) '
-              'est déjà vérifié.',
-              style: TextStyle(
-                  fontSize: 12.5, color: scheme.onSurface.withValues(alpha: 0.55)),
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: !_valid || _saving ? null : _save,
-              child: Text(_saving ? 'Un instant…' : 'Continuer'),
-            ),
-          ],
+          ),
         ),
       ),
     );

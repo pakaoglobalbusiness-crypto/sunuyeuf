@@ -5,3 +5,8 @@ build/
 *.db
 .DS_Store
 /backend/uploads/
+
+# Secrets de signature Android — NE JAMAIS COMMITTER
+*.jks
+*.keystore
+mobile/android/key.properties

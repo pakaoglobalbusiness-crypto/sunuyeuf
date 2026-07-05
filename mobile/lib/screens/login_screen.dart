@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../api.dart';
 import '../main.dart';
 import 'home_screen.dart';
+import 'complete_profile_screen.dart';
 import 'terms_screen.dart';
 
 /// Connexion par numéro de téléphone + OTP SMS (F1).
@@ -46,12 +47,15 @@ class _LoginScreenState extends State<LoginScreen> {
       });
       await Api.setSession(res['token'], res['user']);
       if (!mounted) return;
-      // Conditions d'utilisation à accepter avant l'accès (une seule fois)
-      final accepted = res['user']?['acceptedTermsAt'] != null;
+      final u = res['user'] ?? {};
+      final hasName = (u['firstName'] as String?)?.isNotEmpty ?? false;
+      final accepted = u['acceptedTermsAt'] != null;
+      // 1) profil (prénom/nom) obligatoire, 2) conditions, 3) app
+      final next = !hasName
+          ? const CompleteProfileScreen()
+          : (accepted ? const HomeScreen() : const TermsScreen());
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => accepted ? const HomeScreen() : const TermsScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => next),
       );
     } on ApiException catch (e) {
       setState(() => _error = e.message);
@@ -123,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               keyboardType: TextInputType.phone,
                               decoration: const InputDecoration(
                                 labelText: 'Numéro de téléphone',
-                                hintText: '+221 7X XXX XX XX',
+                                hintText: '+221, +33, +1... (format international)',
                                 prefixIcon: Icon(Icons.phone),
                               ),
                             ),

@@ -13,6 +13,9 @@ import { UsersService } from './users.service';
 
 class UpdateProfileDto {
   @IsOptional() @IsString() name?: string;
+  @IsOptional() @IsString() firstName?: string;
+  @IsOptional() @IsString() lastName?: string;
+  @IsOptional() @IsString() email?: string;
   @IsOptional() @IsString() photoUrl?: string;
   // Coordonnées de paiement (remboursements locataires / gains propriétaires)
   @IsOptional() @IsIn(['wave', 'orange_money', 'free_money', 'bank']) payoutMethod?: string;

@@ -19,6 +19,9 @@ model User {
   id            String   @id @default(cuid())
   phone         String   @unique
   name          String?
+  firstName     String?
+  lastName      String?
+  email         String?
   photoUrl      String?
   role          String   @default("renter") // renter | owner | admin
   kycStatus     String   @default("none") // none | pending | verified | rejected

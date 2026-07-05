@@ -18,6 +18,9 @@ export class UsersService {
     userId: string,
     data: {
       name?: string;
+      firstName?: string;
+      lastName?: string;
+      email?: string;
       photoUrl?: string;
       payoutMethod?: string;
       payoutAccount?: string;

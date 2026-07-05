@@ -17,6 +17,7 @@ class ListingDetailScreen extends StatefulWidget {
 
 class _ListingDetailScreenState extends State<ListingDetailScreen> {
   Map<String, dynamic>? _listing;
+  List<dynamic> _reviews = [];
   String? _error;
   DateTimeRange? _dates;
   bool _booking = false;
@@ -31,6 +32,8 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
     try {
       final res = await Api.get('/listings/${widget.listingId}');
       setState(() => _listing = res);
+      final reviews = await Api.get('/reviews/listing/${widget.listingId}');
+      if (mounted) setState(() => _reviews = reviews);
     } on ApiException catch (e) {
       setState(() => _error = e.message);
     }
@@ -247,6 +250,36 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                     ),
                   ],
                 ),
+                // Avis des locataires (pour conseiller ou éviter)
+                const Divider(height: 28),
+                Row(
+                  children: [
+                    const Text('Avis des locataires',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                    const Spacer(),
+                    if ((l['avgRating'] as num) > 0)
+                      Row(
+                        children: [
+                          const Icon(Icons.star_rounded, size: 18, color: gologuiOrange),
+                          Text(' ${l['avgRating']} · ${l['ratingCount']} avis',
+                              style: const TextStyle(fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                if (_reviews.isEmpty)
+                  Text(
+                    'Aucun avis pour le moment. Soyez le premier à donner votre '
+                    'avis après votre location.',
+                    style: TextStyle(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.55)),
+                  )
+                else
+                  for (final r in _reviews) _ReviewTile(review: r),
                 const SizedBox(height: 90),
               ],
             ),
@@ -469,6 +502,57 @@ class _NavArrow extends StatelessWidget {
           padding: const EdgeInsets.all(6),
           child: Icon(icon, color: Colors.white, size: 26),
         ),
+      ),
+    );
+  }
+}
+
+/// Un avis (note + commentaire + auteur).
+class _ReviewTile extends StatelessWidget {
+  final Map<String, dynamic> review;
+  const _ReviewTile({required this.review});
+
+  @override
+  Widget build(BuildContext context) {
+    final rating = (review['rating'] ?? 0) as int;
+    final author = review['author'] ?? {};
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: gologuiTeal,
+                backgroundImage: author['photoUrl'] != null
+                    ? NetworkImage(author['photoUrl'])
+                    : null,
+                child: author['photoUrl'] == null
+                    ? Text((author['name'] ?? '?')[0],
+                        style: const TextStyle(color: Colors.white, fontSize: 13))
+                    : null,
+              ),
+              const SizedBox(width: 8),
+              Text(author['name'] ?? 'Locataire',
+                  style: const TextStyle(fontWeight: FontWeight.w600)),
+              const Spacer(),
+              Row(
+                children: [
+                  for (var i = 1; i <= 5; i++)
+                    Icon(i <= rating ? Icons.star_rounded : Icons.star_outline_rounded,
+                        size: 16, color: gologuiOrange),
+                ],
+              ),
+            ],
+          ),
+          if ((review['comment'] ?? '').toString().isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, left: 40),
+              child: Text(review['comment'], style: const TextStyle(height: 1.4)),
+            ),
+        ],
       ),
     );
   }
